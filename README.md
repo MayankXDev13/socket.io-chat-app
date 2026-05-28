@@ -1,159 +1,249 @@
-# Turborepo starter
+# ChatVault 💬
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, full-stack real-time chat application with private and group messaging, built with a focus on premium UI and developer experience.
 
-## Using this example
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Socket.io](https://img.shields.io/badge/Socket.io-black?style=for-the-badge&logo=socket.io&badgeColor=010101)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-Run the following command:
+## ✨ Features
 
-```sh
-npx create-turbo@latest
+- **Real-time Messaging** — Instant message delivery via Socket.io
+- **Private Chats** — One-on-one direct messaging
+- **Group Chats** — Create rooms, add/remove members
+- **User Search** — Find users by username
+- **Authentication** — JWT-based with email verification & password reset
+- **Paginated History** — Load older messages on scroll (20 per page)
+- **Online Presence** — See who's online in real-time
+- **Typing Indicators** — Know when someone is typing
+- **Modern UI** — Dark mode, glassmorphism, smooth animations
+
+## 🛠️ Tech Stack
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Express** | HTTP server & REST API |
+| **Socket.io** | Real-time WebSocket communication |
+| **Drizzle ORM** | Type-safe database queries |
+| **PostgreSQL** | Persistent data storage |
+| **JWT** | Authentication tokens |
+| **Resend** | Transactional emails |
+| **Zod** | Request validation |
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| **React 19** | UI framework |
+| **Vite** | Build tool & dev server |
+| **TanStack Query** | Server state management |
+| **shadcn/ui** | Component library |
+| **Tailwind CSS** | Utility-first styling |
+| **React Hook Form** | Form handling |
+| **Zod** | Form validation |
+| **Socket.io Client** | Real-time communication |
+
+### Shared
+| Technology | Purpose |
+|------------|---------|
+| **@repo/shared** | Zod schemas & TypeScript types shared between frontend and backend |
+
+## 📁 Project Structure
+
+```
+socket.io-chat-app/
+├── apps/
+│   ├── backend/           # Express + Socket.io API server
+│   │   ├── src/
+│   │   │   ├── db/        # Drizzle ORM schemas & connection
+│   │   │   ├── lib/       # JWT, email utilities
+│   │   │   ├── middleware/ # Auth, validation middleware
+│   │   │   ├── routes/    # REST API endpoints
+│   │   │   ├── socket/    # Socket.io event handlers
+│   │   │   └── index.ts   # Server entry point
+│   │   └── drizzle.config.ts
+│   └── frontend/          # React + Vite UI
+│       ├── src/
+│       │   ├── components/ # UI components (shadcn/ui + custom)
+│       │   ├── contexts/   # React contexts (Auth)
+│       │   ├── hooks/      # Custom hooks (useSocket, useMessages, etc.)
+│       │   ├── lib/        # API client, utilities
+│       │   ├── pages/      # Route pages
+│       │   └── socket/     # Socket.io client setup
+│       └── components.json
+├── packages/
+│   ├── shared/            # Shared Zod schemas & types
+│   ├── ui/                # Shared UI component library
+│   ├── eslint-config/     # ESLint configurations
+│   └── typescript-config/ # Shared TypeScript configs
+├── turbo.json
+└── pnpm-workspace.yaml
 ```
 
-## What's inside?
+## 🚀 Getting Started
 
-This Turborepo includes the following packages/apps:
+### Prerequisites
 
-### Apps and Packages
+- **Node.js** ≥ 18
+- **pnpm** ≥ 9.0.0
+- **PostgreSQL** ≥ 14
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### 1. Clone & Install
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```bash
+git clone <your-repo-url>
+cd socket.io-chat-app
+pnpm install
 ```
 
-Without global `turbo`, use your package manager:
+### 2. Configure Environment
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+Copy the example env file and fill in your values:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Edit `apps/backend/.env`:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/chatapp
+JWT_SECRET=your-super-secret-jwt-key
+JWT_REFRESH_SECRET=your-super-secret-refresh-key
+RESEND_API_KEY=re_your_api_key
+CLIENT_URL=http://localhost:5173
+PORT=3000
+EMAIL_FROM=onboarding@resend.dev
 ```
 
-Without global `turbo`:
+### 3. Set Up Database
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+Create a PostgreSQL database, then push the schema:
+
+```bash
+# Create database (if using psql)
+createdb chatapp
+
+# Push Drizzle schema to database
+pnpm --filter @myapp/backend db:push
 ```
 
-### Develop
+### 4. Start Development
 
-To develop all apps and packages, run the following command:
+```bash
+# Start both frontend and backend
+pnpm dev
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+# Or start individually:
+pnpm --filter @myapp/backend dev   # Backend on http://localhost:3000
+pnpm --filter frontend dev         # Frontend on http://localhost:5173
 ```
 
-Without global `turbo`, use your package manager:
+## 📡 API Reference
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login & get tokens |
+| POST | `/api/auth/verify-email` | Verify email address |
+| POST | `/api/auth/forgot-password` | Request password reset |
+| POST | `/api/auth/reset-password` | Reset password with token |
+| POST | `/api/auth/refresh` | Refresh access token |
+| GET | `/api/auth/me` | Get current user 🔒 |
+
+### Users
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users/search?q=` | Search users by username 🔒 |
+| GET | `/api/users/:id` | Get user profile 🔒 |
+
+### Rooms
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/rooms` | Create room (DM or group) 🔒 |
+| GET | `/api/rooms` | List user's rooms 🔒 |
+| GET | `/api/rooms/:id` | Get room details 🔒 |
+| POST | `/api/rooms/:id/members` | Add member to group 🔒 |
+| DELETE | `/api/rooms/:id/members/:userId` | Remove member 🔒 |
+
+### Messages
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/rooms/:roomId/messages` | Get paginated messages 🔒 |
+
+🔒 = Requires `Authorization: Bearer <token>` header
+
+## 🔌 Socket Events
+
+### Client → Server
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `join_room` | `roomId: string` | Join a chat room |
+| `leave_room` | `roomId: string` | Leave a chat room |
+| `send_message` | `{ roomId, content }` | Send a message |
+| `typing` | `roomId: string` | Start typing indicator |
+| `stop_typing` | `roomId: string` | Stop typing indicator |
+
+### Server → Client
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `receive_message` | `Message` | New message received |
+| `user_typing` | `{ roomId, userId, username }` | User started typing |
+| `user_stop_typing` | `{ roomId, userId }` | User stopped typing |
+| `user_online` | `userId: string` | User came online |
+| `user_offline` | `userId: string` | User went offline |
+| `room_updated` | `Room` | Room data changed |
+
+## 🗄️ Database Schema
+
+```
+users
+├── id (uuid, PK)
+├── email (varchar, unique)
+├── username (varchar, unique)
+├── passwordHash (varchar)
+├── isVerified (boolean)
+├── createdAt (timestamp)
+└── updatedAt (timestamp)
+
+rooms
+├── id (uuid, PK)
+├── name (varchar, nullable)
+├── isGroup (boolean)
+├── createdBy (uuid, FK → users)
+├── createdAt (timestamp)
+└── updatedAt (timestamp)
+
+room_members
+├── id (uuid, PK)
+├── roomId (uuid, FK → rooms)
+├── userId (uuid, FK → users)
+└── joinedAt (timestamp)
+
+messages
+├── id (uuid, PK)
+├── roomId (uuid, FK → rooms)
+├── senderId (uuid, FK → users)
+├── content (text)
+└── createdAt (timestamp)
+
+verification_tokens
+├── id (uuid, PK)
+├── userId (uuid, FK → users)
+├── token (varchar, unique)
+├── type (varchar: 'email_verify' | 'password_reset')
+├── expiresAt (timestamp)
+└── createdAt (timestamp)
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## 📜 License
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+MIT

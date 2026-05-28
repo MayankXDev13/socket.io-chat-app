@@ -1,46 +1,32 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import cors from "cors";
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import routes from './routes';
+import { setupSocketIO } from './socket';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}));
+
+// API routes
+app.use('/api', routes);
+
+// Health check
+app.get('/', (_req, res) => {
+  res.json({ status: 'ok', message: 'ChatVault API running' });
+});
 
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-  },
-});
-
-app.get("/", (req, res) => {
-  res.send("Server running");
-});
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  // listen this event from client
-  socket.on("send_message", (data) => {
-    console.log(data);
-
-    // emit this event to all clients
-    io.emit("receive_message", data);
-  });
-
-  
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
-
-
-});
+setupSocketIO(server);
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 ChatVault server running on http://localhost:${PORT}`);
 });
