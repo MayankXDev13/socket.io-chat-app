@@ -24,15 +24,21 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  // listen this event from client
   socket.on("send_message", (data) => {
     console.log(data);
 
+    // emit this event to all clients
     io.emit("receive_message", data);
   });
+
+  
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
+
+
 });
 
 server.listen(PORT, () => {
